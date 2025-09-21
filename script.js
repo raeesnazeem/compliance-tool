@@ -1,11 +1,10 @@
-// --- 1. App Namespace & State ---
+// --- 1. APP NAMESPACE & STATE ---
 const App = {
     chartInstance: null,
-    // Page-specific elements will be populated in their init functions
     elements: {},
 };
 
-// --- 2. Common Functions ---
+// --- 2. COMMON FUNCTIONS ---
 const getReports = () => JSON.parse(localStorage.getItem('reports_db')) || [];
 const saveReports = (reports) => localStorage.setItem('reports_db', JSON.stringify(reports));
 
@@ -16,48 +15,46 @@ const ICONS = {
 
 const setTheme = (theme) => {
     localStorage.setItem('theme', theme);
-    document.body.classList.toggle('light-theme', theme === 'light');
+    // MODIFIED: Target the root <html> element
+    document.documentElement.classList.toggle('light-theme', theme === 'light');
     const themeSwitcher = document.getElementById('theme-switcher');
     if (themeSwitcher) {
         themeSwitcher.innerHTML = theme === 'light' ? ICONS.moon : ICONS.sun;
     }
-    // If the chart render function exists (i.e., we are on the dashboard), call it
     if (typeof App.renderCategoryChart === 'function') {
         App.renderCategoryChart();
     }
 };
 
-// --- 3. Page-Specific Modules ---
+// --- 3. PAGE-SPECIFIC MODULES ---
 
-/**
- * Initializes the Form Page (index.html)
- */
 App.initFormPage = () => {
-    App.elements.reportForm = document.getElementById('report-form');
-    App.elements.formContainer = document.getElementById('form-container');
-    App.elements.submissionResult = document.getElementById('submission-result');
-    App.elements.refNumberEl = document.getElementById('ref-number');
-    App.elements.jsonOutputEl = document.getElementById('json-output');
-    App.elements.submitAnotherBtn = document.getElementById('submit-another');
+    // Logic for index.html
+    const reportForm = document.getElementById('report-form');
+    const formContainer = document.getElementById('form-container');
+    const submissionResult = document.getElementById('submission-result');
+    const refNumberEl = document.getElementById('ref-number');
+    const jsonOutputEl = document.getElementById('json-output');
+    const submitAnotherBtn = document.getElementById('submit-another');
 
     const showSuccessScreen = (data) => {
-        App.elements.refNumberEl.textContent = data.id;
-        App.elements.jsonOutputEl.textContent = JSON.stringify(data, null, 2);
-        App.elements.formContainer.classList.add('hidden');
-        App.elements.submissionResult.classList.remove('hidden');
+        refNumberEl.textContent = data.id;
+        jsonOutputEl.textContent = JSON.stringify(data, null, 2);
+        formContainer.classList.add('hidden');
+        submissionResult.classList.remove('hidden');
     };
     const showFormScreen = () => {
-        App.elements.reportForm.reset();
-        App.elements.submissionResult.classList.add('hidden');
-        App.elements.formContainer.classList.remove('hidden');
+        reportForm.reset();
+        submissionResult.classList.add('hidden');
+        formContainer.classList.remove('hidden');
     };
 
-    App.elements.reportForm.addEventListener('submit', (e) => {
+    reportForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const requiredFields = ['report-type', 'location', 'date-incident', 'description', 'confirmation'];
         let isValid = true;
         requiredFields.forEach(field => {
-            const element = App.elements.reportForm.elements[field];
+            const element = reportForm.elements[field];
             if ((element.type === 'checkbox' && !element.checked) || !element.value) {
                 isValid = false;
             }
@@ -68,7 +65,7 @@ App.initFormPage = () => {
             return;
         }
 
-        const formData = new FormData(App.elements.reportForm);
+        const formData = new FormData(reportForm);
         const isAnonymous = formData.get('anonymous') === 'on';
         const dateIncidentStr = formData.get('date-incident');
         const submissionTimestamp = dateIncidentStr ? new Date(dateIncidentStr).toISOString() : new Date().toISOString();
@@ -88,27 +85,23 @@ App.initFormPage = () => {
         showSuccessScreen(reportData);
     });
     
-    App.elements.submitAnotherBtn.addEventListener('click', showFormScreen);
+    submitAnotherBtn.addEventListener('click', showFormScreen);
 };
 
-/**
- * Initializes the Reports Page (reports.html)
- */
 App.initReportsPage = () => {
-    // Automatic Data Fixer
+    // Logic for reports.html
     (function cleanAndValidateData() {
         let reports = getReports();
         if (reports.length > 0 && typeof reports[0].details === 'undefined') {
-            console.warn('Old data format detected. Clearing localStorage to reset.');
             localStorage.removeItem('reports_db');
         }
     })();
     
-    App.elements.reportsBody = document.getElementById('reportsBody');
-    App.elements.q = document.getElementById('q');
-    App.elements.detailModal = document.getElementById('detailModal');
-    App.elements.detailContent = document.getElementById('detailContent');
-    App.elements.closeModal = document.getElementById('closeModal');
+    const reportsBody = document.getElementById('reportsBody');
+    const q = document.getElementById('q');
+    const detailModal = document.getElementById('detailModal');
+    const detailContent = document.getElementById('detailContent');
+    const closeModal = document.getElementById('closeModal');
 
     function seedInitialReports() {
         if (getReports().length > 0) return;
@@ -125,50 +118,44 @@ App.initReportsPage = () => {
     function formatDate(isoString) { if (!isoString) return '—'; try { return new Date(isoString).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return isoString; } }
     
     function renderList(filterText = '') {
-        App.elements.reportsBody.innerHTML = '';
+        reportsBody.innerHTML = '';
         const reports = getReports().slice().sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
         const ft = filterText.trim().toLowerCase();
         const shown = reports.filter(r => { if (!ft) return true; return (r.id || '').toLowerCase().includes(ft) || ((r.details||{}).type || '').toLowerCase().includes(ft) || ((r.details||{}).location || '').toLowerCase().includes(ft); });
-        if (shown.length === 0) { App.elements.reportsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px;">No reports found.</td></tr>`; return; }
+        if (shown.length === 0) { reportsBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px;">No reports found.</td></tr>`; return; }
         shown.forEach(r => {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td style="font-weight:600">${r.id || '—'}</td><td>${formatDate(r.submittedAt)}</td><td>${(r.details && r.details.type) || '—'}</td><td>${(r.details && r.details.location) || '—'}</td><td><span class="status ${r.isAnonymous ? 'yes' : 'no'}">${r.isAnonymous ? 'Yes' : 'No'}</span></td><td><button class="ghost view-btn" data-id="${r.id}" style="padding: 6px 10px;">View</button></td>`;
-            App.elements.reportsBody.appendChild(tr);
+            reportsBody.appendChild(tr);
         });
     }
 
     function openDetail(id) {
         const r = getReports().find(x => x.id === id); if (!r) return;
         const c = r.contact || {}; const d = r.details || {}; const a = r.additionalInfo || {};
-        App.elements.detailContent.innerHTML = `<div class="meta"><div><strong>Report ID</strong> ${r.id}</div><div><strong>Submission Date</strong> ${formatDate(r.submittedAt)}</div><div><strong>Incident Date</strong> ${d.incidentDate || '—'}</div><div><strong>Concern Type</strong> ${d.type || '—'}</div><div><strong>Location / Dept.</strong> ${d.location || '—'}</div><div><strong>Anonymous Submission</strong> ${r.isAnonymous ? 'Yes' : 'No'}</div></div><h4>Contact Information</h4><div class="meta"><div><strong>Name</strong> ${c.name || '—'}</div><div><strong>Email</strong> ${c.email || '—'}</div><div><strong>Phone</strong> ${c.phone || '—'}</div></div><h4>Additional Information</h4><div class="meta"><div><strong>Witnesses Present</strong> ${a.witnesses ? 'Yes' : 'No'}</div><div><strong>Evidence Available</strong> ${a.evidence ? 'Yes' : 'No'}</div><div><strong>Previously Reported</strong> ${a.previouslyReported ? 'Yes' : 'No'}</div></div><h4>Description</h4><p style="white-space:pre-wrap; color:var(--muted); margin-top:4px;">${d.description || '—'}</p><details><summary style="cursor:pointer; font-size:14px; margin-top:16px;">View Raw JSON Data</summary><pre>${JSON.stringify(r, null, 2)}</pre></details>`;
-        App.elements.detailModal.classList.add('visible');
+        detailContent.innerHTML = `<div class="meta"><div><strong>Report ID</strong> ${r.id}</div><div><strong>Submission Date</strong> ${formatDate(r.submittedAt)}</div><div><strong>Incident Date</strong> ${d.incidentDate || '—'}</div><div><strong>Concern Type</strong> ${d.type || '—'}</div><div><strong>Location / Dept.</strong> ${d.location || '—'}</div><div><strong>Anonymous Submission</strong> ${r.isAnonymous ? 'Yes' : 'No'}</div></div><h4>Contact Information</h4><div class="meta"><div><strong>Name</strong> ${c.name || '—'}</div><div><strong>Email</strong> ${c.email || '—'}</div><div><strong>Phone</strong> ${c.phone || '—'}</div></div><h4>Additional Information</h4><div class="meta"><div><strong>Witnesses Present</strong> ${a.witnesses ? 'Yes' : 'No'}</div><div><strong>Evidence Available</strong> ${a.evidence ? 'Yes' : 'No'}</div><div><strong>Previously Reported</strong> ${a.previouslyReported ? 'Yes' : 'No'}</div></div><h4>Description</h4><p style="white-space:pre-wrap; color:var(--muted); margin-top:4px;">${d.description || '—'}</p><details><summary style="cursor:pointer; font-size:14px; margin-top:16px;">View Raw JSON Data</summary><pre>${JSON.stringify(r, null, 2)}</pre></details>`;
+        detailModal.classList.add('visible');
     }
 
-    App.elements.reportsBody.addEventListener('click', (event) => {
+    reportsBody.addEventListener('click', (event) => {
         const viewButton = event.target.closest('.view-btn');
         if (viewButton) { openDetail(viewButton.dataset.id); }
     });
     
-    App.elements.closeModal.addEventListener('click', () => App.elements.detailModal.classList.remove('visible'));
-    App.elements.q.addEventListener('input', (e) => renderList(e.target.value));
+    closeModal.addEventListener('click', () => detailModal.classList.remove('visible'));
+    q.addEventListener('input', (e) => renderList(e.target.value));
 
     seedInitialReports();
     renderList();
 };
 
-/**
- * Initializes the Dashboard Page (dashboardnew.html)
- */
 App.initDashboard = () => {
+    // Logic for dashboardnew.html
     Object.assign(App.elements, {
-        kpiTotal: document.getElementById('kpi-total-reports'),
-        kpiAnonymous: document.getElementById('kpi-anonymous-reports'),
-        kpiCommonCategory: document.getElementById('kpi-common-category'),
-        kpiLatest: document.getElementById('kpi-latest'),
-        kpiReports30d: document.getElementById('kpi-reports-30d'),
-        kpiAvgAge: document.getElementById('kpi-avg-age'),
-        reportsTableBody: document.getElementById('reportsTableBody'),
-        categoryChartCanvas: document.getElementById('categoryChart'),
+        kpiTotal: document.getElementById('kpi-total-reports'), kpiAnonymous: document.getElementById('kpi-anonymous-reports'),
+        kpiCommonCategory: document.getElementById('kpi-common-category'), kpiLatest: document.getElementById('kpi-latest'),
+        kpiReports30d: document.getElementById('kpi-reports-30d'), kpiAvgAge: document.getElementById('kpi-avg-age'),
+        reportsTableBody: document.getElementById('reportsTableBody'), categoryChartCanvas: document.getElementById('categoryChart'),
     });
 
     function renderKpis() {
@@ -208,7 +195,7 @@ App.initDashboard = () => {
         const counts = reports.reduce((acc, r) => { const type = ((r.details||{}).type || 'Other'); acc[type] = (acc[type] || 0) + 1; return acc; }, {});
         const chartLabels = Object.keys(counts);
         if (chartLabels.length === 0) { App.elements.categoryChartCanvas.getContext('2d').clearRect(0,0,App.elements.categoryChartCanvas.width, App.elements.categoryChartCanvas.height); return; }
-        const isLightTheme = document.body.classList.contains('light-theme');
+        const isLightTheme = document.documentElement.classList.contains('light-theme');
         const tickColor = isLightTheme ? 'rgba(20, 30, 40, 0.6)' : 'rgba(255, 255, 255, 0.6)';
         const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.07)' : 'rgba(255, 255, 255, 0.04)';
         const preferred = ['Harassment', 'Fraud', 'Ethics', 'Safety', 'Legal', 'Other'];
@@ -216,10 +203,7 @@ App.initDashboard = () => {
         const orderedData = orderedLabels.map(l => counts[l] || 0);
         App.chartInstance = new Chart(App.elements.categoryChartCanvas, {
             type: 'bar',
-            data: {
-                labels: orderedLabels,
-                datasets: [{ label: '# of Reports', data: orderedData, backgroundColor: orderedLabels.map(l => { if (l === 'Fraud') return 'rgba(200,60,60,0.6)'; if (l === 'Harassment') return 'rgba(255,69,0,0.5)'; if (l === 'Ethics') return 'rgba(99,102,241,0.55)'; if (l === 'Safety') return 'rgba(245,158,11,0.6)'; if (l === 'Legal') return 'rgba(16,163,74,0.6)'; return 'rgba(160,160,160,0.45)'; }), borderWidth: 0, borderRadius: 4, barPercentage: 0.45, maxBarThickness: 18 }]
-            },
+            data: { labels: orderedLabels, datasets: [{ label: '# of Reports', data: orderedData, backgroundColor: orderedLabels.map(l => { if (l === 'Fraud') return 'rgba(200,60,60,0.6)'; if (l === 'Harassment') return 'rgba(255,69,0,0.5)'; if (l === 'Ethics') return 'rgba(99,102,241,0.55)'; if (l === 'Safety') return 'rgba(245,158,11,0.6)'; if (l === 'Legal') return 'rgba(16,163,74,0.6)'; return 'rgba(160,160,160,0.45)'; }), borderWidth: 0, borderRadius: 4, barPercentage: 0.45, maxBarThickness: 18 }] },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, color: tickColor }, grid: { color: gridColor } }, x: { ticks: { color: tickColor }, grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}` } } } }
         });
     }
@@ -230,6 +214,14 @@ App.initDashboard = () => {
 
 
     // --- 4. Main Initializer ---
+    const themeSwitcher = document.getElementById('theme-switcher');
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+    }
+    
     if (document.getElementById('report-form')) {
         App.initFormPage();
     } else if (document.getElementById('reportsBody')) {
@@ -237,4 +229,5 @@ App.initDashboard = () => {
     } else if (document.getElementById('kpi-total-reports')) {
         App.initDashboard();
     }
+    
     setTheme(localStorage.getItem('theme') || 'dark');

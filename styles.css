@@ -13,7 +13,8 @@
     color: #e6eef6;
 }
 
-body.light-theme {
+/* MODIFIED: Changed from 'body.light-theme' to '.light-theme' */
+.light-theme {
     --bg: #f0f2f5;
     --panel: #ffffff;
     --muted: #5a6a7b;
@@ -33,7 +34,7 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-body.light-theme {
+.light-theme body {
     background: #e9eef2;
 }
 
@@ -59,7 +60,7 @@ body.light-theme {
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-body.light-theme .sidebar {
+.light-theme .sidebar {
     background: var(--panel);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -115,8 +116,8 @@ body.light-theme .sidebar {
     box-shadow: inset 0 0 0 1px rgba(255, 69, 0, 0.04);
 }
 
-body.light-theme .nav a.active,
-body.light-theme .nav a:hover {
+.light-theme .nav a.active,
+.light-theme .nav a:hover {
     color: var(--accent);
     background: rgba(255, 69, 0, 0.06);
     box-shadow: none;
@@ -198,7 +199,7 @@ body.light-theme .nav a:hover {
     padding: 10px 16px;
 }
 
-body.light-theme .ghost {
+.light-theme .ghost {
     border-color: rgba(0, 0, 0, 0.15);
 }
 
@@ -210,7 +211,7 @@ body.light-theme .ghost {
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-body.light-theme .card {
+.light-theme .card {
     background: var(--panel);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -227,7 +228,7 @@ body.light-theme .card {
     flex-grow: 1;
 }
 
-body.light-theme .form-card {
+.light-theme .form-card {
     background: var(--panel);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -252,7 +253,7 @@ body.light-theme .form-card {
     padding-bottom: 8px;
 }
 
-body.light-theme .form-section h3 {
+.light-theme .form-section h3 {
     border-bottom-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -284,7 +285,7 @@ body.light-theme .form-section h3 {
     transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-body.light-theme .form-control {
+.light-theme .form-control {
     background: #f0f2f5;
     border-color: rgba(0, 0, 0, 0.1);
 }
@@ -350,7 +351,7 @@ body.light-theme .form-control {
     max-width: 500px;
 }
 
-body.light-theme .submission-result pre {
+.light-theme .submission-result pre {
     background: #f0f2f5;
     border-color: rgba(0, 0, 0, 0.1);
 }
@@ -368,7 +369,7 @@ body.light-theme .submission-result pre {
     width: 100%;
 }
 
-body.light-theme .search {
+.light-theme .search {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -394,7 +395,7 @@ body.light-theme .search {
     flex-grow: 1;
 }
 
-body.light-theme .table-card {
+.light-theme .table-card {
     background: var(--panel);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.06);
@@ -422,7 +423,7 @@ thead th {
     font-weight: 600;
 }
 
-body.light-theme thead th {
+.light-theme thead th {
     background: rgba(255, 255, 255, 0.8);
 }
 
@@ -431,7 +432,7 @@ tbody td {
     border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-body.light-theme tbody td {
+.light-theme tbody td {
     border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -479,7 +480,7 @@ body.light-theme tbody td {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-body.light-theme .modal {
+.light-theme .modal {
     background: var(--panel);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
@@ -525,11 +526,10 @@ body.light-theme .modal {
     margin-top: 16px;
 }
 
-body.light-theme .modal-body pre {
+.light-theme .modal-body pre {
     background: #f0f2f5;
     border-color: rgba(0, 0, 0, 0.1);
 }
-
 
 /* --- Dashboard Page Specific --- */
 .card.kpi {
